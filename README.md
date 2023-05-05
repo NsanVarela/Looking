@@ -1,81 +1,43 @@
-My React App
+﻿OCR / ICR Document Analysis App
 
-This is a basic template for a Node.js, React, and Express application. It includes webpack and babel for bundling and transpiling the client-side code.
+Cette application est conçue pour analyser des documents à l'aide de la reconnaissance optique de caractères (OCR) et de la reconnaissance intelligente de caractères (ICR). Elle permet de convertir les images de documents en texte et d'extraire des informations clés à partir de ces documents.
 
-Getting Started
+Comment utiliser l'application
 
-Prerequisites
+1. Installez les dépendances requises en exécutant la commande suivante :
 
-- Node.js (v14 or higher)
-
-Installing
-
-1. Clone the repository
-
-bashCopy code
-
-git clone <github-path>
-
-1. Install dependencies
-
-bashCopy code
-
-cd my-react-app
+Copy code
 
 npm install
 
-Running the Application
-
-1. Start the development server
-
-arduinoCopy code
-
-npm run dev
-
-1. Open a web browser and go to http://localhost:3000
-
-Building for Production
-
-To create a production build of the client-side code, run:
-
-arduinoCopy code
-
-npm run build
-
-This will create a dist folder with the bundled and optimized files.
-
-Running the Production Build
-
-1. Start the server
+1. Démarrez l'application en exécutant la commande suivante :
 
 sqlCopy code
 
 npm start
 
-1. Open a web browser and go to http://localhost:3000
+1. Importez le document à analyser en cliquant sur le bouton "Importer" et en sélectionnant le fichier image correspondant.
+1. Attendez que l'application analyse le document. Les résultats de l'analyse seront affichés dans la fenêtre de sortie.
 
-File Structure
+Fonctionnalités clés
 
-- client: This folder contains the client-side code
+- Conversion d'image en texte à l'aide de l'OCR
+- Extraction de données clés à partir de documents analysés
+- Interface utilisateur simple et conviviale
 
-◦ index.js: Entry point for the client-side code
+Technologies utilisées
 
-- node\_modules: This folder contains the dependencies
-- public: This folder contains the static files that will be served to the client
+- Node.js
+- Tesseract.js pour l'OCR
+- OpenCV.js pour l'ICR
+- React.js pour l'interface utilisateur
 
-◦ index.html: The HTML file that the client will initially load
+Contribuer
 
-- server: This folder contains the server-side code
-- src: This folder contains the shared code between the client and server
+Si vous souhaitez contribuer à ce projet, n'hésitez pas à créer une branche à partir de la branche "develop", à apporter vos modifications et à soumettre une demande de tirage. Nous examinerons votre contribution dès que possible.
 
-◦ App.js: The root React component for the application
+Auteurs
 
-◦ Home.js: An example React component for the home page
+- Nicolas Sanches Varela
 
-- package.json: Defines the project dependencies and scripts
-- server.js: Entry point for the server-side code
-- webpack.config.js: Configuration file for webpack
-
-License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
+N'hésitez pas à nous contacter si vous avez des questions ou des commentaires. Nous serons ravis de vous aider.
