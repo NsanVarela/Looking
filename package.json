@@ -1,7 +1,7 @@
 {
-  "name": "React-Nodejs-skeleton",
+  "name": "Vision",
   "version": "1.0.0",
-  "description": "This is a basic template for a Node.js, React, and Express application",
+  "description": "OCR-ICR Document analysis app",
   "main": "server/server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
