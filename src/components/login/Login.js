@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { TextField, Button, Grid } from '@mui/material';
+// import GithubAuthButton from './GithubAuthButton';
 
 const Login = () => {
     const navigate = useNavigate();
@@ -36,6 +37,7 @@ const Login = () => {
     };
 
     return (
+        // <GithubAuthButton />
         <form onSubmit={handleSubmit}>
             <Grid container spacing={2}>
                 <Grid item xs={12}>
