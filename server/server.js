@@ -18,11 +18,17 @@ app.post('/login', (req, res) => {
     // Vérifiez les informations d'identification de l'utilisateur ici
 
     if (res.status(200)) {
-        res.send('Login successfull');
+        console.log('Login successfull');
+        res.send('Authentication successful');
     } else {
         res.status(401).send('Invalid username or password');
     }
-})
+});
+
+app.get('/home', (req, res) => {
+    // traitement de la requête GET pour la route '/home'
+    res.send('Welcome to the home page');
+});
 
 app.listen(port, () => {
     console.log('Server listening on port ' , port);

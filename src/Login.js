@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { TextField, Button, Grid } from '@mui/material';
 
-function Login() {
+const Login = () => {
+    const navigate = useNavigate();
+
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
 
@@ -14,7 +17,6 @@ function Login() {
         setPassword(event.target.value);
     };
 
-
     const handleSubmit = async (event) => {
         event.preventDefault();
 
@@ -23,6 +25,7 @@ function Login() {
 
             if (response.status === 200) {
                 console.log('Le formulaire a été envoyé avec succès');
+                navigate('/home');
             } else {
                 console.log('Il y a eu une erreur lors de l\'envoi du formulaire');
             }
