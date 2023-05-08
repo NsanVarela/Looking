@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { TextField, Button, Grid } from '@mui/material';
+import {TextField, Button, Grid, createTheme} from '@mui/material';
 // import GithubAuthButton from './GithubAuthButton';
 
-const Login = () => {
+const theme = createTheme();
+
+export default function Login() {
     const navigate = useNavigate();
 
     const [username, setUsername] = useState('');
@@ -72,5 +74,3 @@ const Login = () => {
         </form>
     );
 }
-
-export default Login;
