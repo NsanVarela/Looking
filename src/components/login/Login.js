@@ -1,7 +1,20 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import {TextField, Button, Grid, createTheme} from '@mui/material';
+import {
+    TextField,
+    Button,
+    Grid,
+    createTheme,
+    ThemeProvider,
+    Container,
+    CssBaseline,
+    Avatar,
+    Box,
+    Typography
+} from '@mui/material';
+import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
+import GithubAuthButton from "./GithubAuthButton";
 // import GithubAuthButton from './GithubAuthButton';
 
 const theme = createTheme();
@@ -9,11 +22,11 @@ const theme = createTheme();
 export default function Login() {
     const navigate = useNavigate();
 
-    const [username, setUsername] = useState('');
+    const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
 
-    const handleUsernameChange = (event) => {
-        setUsername(event.target.value);
+    const handleEmailChange = (event) => {
+        setEmail(event.target.value);
     };
 
     const handlePasswordChange = (event) => {
@@ -24,7 +37,7 @@ export default function Login() {
         event.preventDefault();
 
         try {
-            const response = await axios.post('http://localhost:3002/login', { username, password });
+            const response = await axios.post('http://localhost:3002/login', { email, password });
 
             if (response.status === 200) {
                 console.log('Le formulaire a été envoyé avec succès');
@@ -39,8 +52,64 @@ export default function Login() {
     };
 
     return (
+        <ThemeProvider theme={theme}>
+            <Container component="main" maxWidth="xs">
+                <CssBaseline />
+                <Box
+                    sx={{
+                        marginTop: 8,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                    }}
+                >
+                    <Avatar sx={{ m: 1, bgcolor: 'secondary.main' }}>
+                        <LockOutlinedIcon />
+                    </Avatar>
+                    <Typography component="h1" variant="h5">
+                        Se connecter
+                    </Typography>
+                    <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
+                        <TextField
+                            margin="normal"
+                            required
+                            fullWidth
+                            id="email"
+                            label="Adresse email"
+                            name="email"
+                            autoComplete="email"
+                            autoFocus
+                            onChange={handleEmailChange}
+                        />
+                        <TextField
+                            margin="normal"
+                            required
+                            fullWidth
+                            name="password"
+                            label="Mot de passe"
+                            type="password"
+                            id="password"
+                            autoComplete="current-password"
+                            onChange={handlePasswordChange}
+                        />
+                        <Button
+                            type="submit"
+                            fullWidth
+                            variant="contained"
+                            sx={{ mt: 3, mb: 2 }}
+                        >
+                            Se connecter
+                        </Button>
+                    </Box>
+                </Box>
+                <hr />
+                <Box>
+                    <GithubAuthButton />
+                </Box>
+            </Container>
+        </ThemeProvider>
         // <GithubAuthButton />
-        <form onSubmit={handleSubmit}>
+        /*<form onSubmit={handleSubmit}>
             <Grid container spacing={2}>
                 <Grid item xs={12}>
                     <TextField
@@ -71,6 +140,6 @@ export default function Login() {
                     </Button>
                 </Grid>
             </Grid>
-        </form>
+        </form>*/
     );
 }

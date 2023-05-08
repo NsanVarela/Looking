@@ -1,5 +1,6 @@
 import React from 'react';
 import axios from 'axios';
+import {Box, Button} from "@mui/material";
 
 const GithubAuthButton = () => {
     const handleGithubAuth = async () => {
@@ -12,7 +13,16 @@ const GithubAuthButton = () => {
     };
 
     return (
-        <button onClick={handleGithubAuth}>Se connecter avec Github</button>
+        <Box component="form" onSubmit={handleGithubAuth} noValidate sx={{ mt: 1 }}>
+            <Button
+                type="submit"
+                fullWidth
+                variant="contained"
+                sx={{ mt: 3, mb: 2 }}
+            >
+                Se connecter avec Github
+            </Button>
+        </Box>
     );
 };
 
