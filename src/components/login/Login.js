@@ -15,6 +15,7 @@ import {
 } from '@mui/material';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import GithubAuthButton from "./GithubAuthButton";
+import {CardId} from "../../../server/models/CardId";
 
 const theme = createTheme();
 
@@ -39,7 +40,8 @@ export default function Login() {
             const response = await axios.post('http://localhost:3002/login', { email, password });
 
             if (response.status === 200) {
-                console.log('Le formulaire a été envoyé avec succès');
+                const cardId = new CardId();
+                console.log('200 + infos : ', email, password, cardId);
                 navigate('/home');
             } else {
                 console.log('Il y a eu une erreur lors de l\'envoi du formulaire');

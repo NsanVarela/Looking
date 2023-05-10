@@ -1,4 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
+import axios from 'axios';
+import { makeStyles } from '@material-ui/core/styles';
 import {
     Grid,
     Typography,
@@ -9,23 +11,39 @@ import {
     TextField,
     MenuItem
 } from '@mui/material';
+import {CardId} from "../../../server/models/CardId";
 
 const Home = () => {
 
-    let securityField;
-    let docType;
-    let docNumber;
-    let lastname;
-    let firstname;
-    let gender;
-    let birth;
-    let placeOfBirth;
-    let size;
-    let zla1;
-    let zla2;
-    let nationality;
-    const cardId = {
-        securityField, docType, docNumber, nationality, lastname, firstname, gender, birth, placeOfBirth, size, zla1, zla2
+    const [imagePreviewUrl, setImagePreviewUrl] = useState('');
+    const cardId = new CardId();
+
+    const handleSubmitWithGoogle = async (event) => {
+        event.preventDefault();
+        const fileInput = document.getElementById('file-to-google');
+        const file = fileInput.files[0];
+
+        const formData = new FormData();
+        formData.append('file', file);
+
+        try {
+            await axios.post('http://localhost:3002/googleSubmit', formData);
+        } catch (error) {
+            console.log("Une erreur s'est produite lors de la requête POST");
+        }
+    }
+
+    const readURL = (event) => {
+        if (event.target.files && event.target.files[0]) {
+            const reader = new FileReader();
+
+            reader.onload = (e) => {
+                setImagePreviewUrl(e.target.result);
+                console.log('imagePreviewUrl:', e.target.result);
+            };
+
+            reader.readAsDataURL(event.target.files[0]);
+        }
     };
 
     const genders = [
@@ -59,10 +77,46 @@ const Home = () => {
         },
     });
 
+    const useStyles = makeStyles((theme) => ({
+        setupContainer: {
+            display: 'flex',
+            flexDirection: 'column',
+            backgroundColor: 'lightsalmon',
+            maxWidth: '50%',
+            margin: '2rem auto',
+            border: 'solid transparent',
+            borderRadius: '0.5rem',
+        },
+        inputContainer: {
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center'
+        },
+        input: {
+            marginTop: '2rem'
+        },
+        imageContainer: {
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            alignItems: 'center',
+            height: '100%',
+            maxWidth: '50%',
+            margin: '2rem auto',
+        },
+        previewImage: {
+            maxWidth: '100%',
+            maxHeight: '100%',
+            marginBottom: '2rem',
+        },
+    }));
+
+    const classes = useStyles();
+
     return (
         <ThemeProvider theme={theme}>
             <Grid container spacing={2} >
-                <Grid item xs="12" sm="6" id="analyser-with-abbyy">
+                {/*<Grid item xs={12} sm={6} id="analyser-with-abbyy">
                     <form action="/abbyy" method="POST" encType="multipart/form-data">
                         <Typography variant="h2" textAlign="center">ABBYY API</Typography>
                         <hr />
@@ -82,38 +136,51 @@ const Home = () => {
                             </Button>
                         </div>
                     </form>
-                </Grid>
+                </Grid>*/}
 
-                <Grid item xs="12" sm="6" id="analyser-with-google">
-                    <form action="/google" method="POST" encType="multipart/form-data">
+                <Grid item xs={12} sm={12} id="analyser-with-google">
+                    <Box component="form" onSubmit={handleSubmitWithGoogle} noValidate>
                         <Typography variant="h2" textAlign="center">GOOGLE VISION API</Typography>
                         <hr />
                         <Typography variant="body1" textAlign="center">
                             Sélectionner une image à uploader (png, jpg, jpeg)
                         </Typography>
-                        <input
-                            type="file"
-                            name="filename"
-                            id="file-to-google"
-                            accept=".jpg, .jpeg, .png"
-                            onChange="readURL(this);"
-                        />
-                        <div>
-                            <Button type="submit" variant="contained" color="primary" size="small">
-                                Analyser avec GOOGLE
-                            </Button>
+                        <div className={classes.setupContainer}>
+                            <div className={classes.inputContainer}>
+                                <input
+                                    type="file"
+                                    name="filename"
+                                    id="file-to-google"
+                                    className={classes.input}
+                                    accept=".jpg, .jpeg, .png"
+                                    onChange={(event) => readURL(event)}
+                                />
+                            </div>
+                            <div className={classes.imageContainer}>
+                                {imagePreviewUrl && (
+                                    <img className={classes.previewImage} src={imagePreviewUrl} alt="Image Preview" />
+                                )}
+                                {imagePreviewUrl && (<div>
+                                    <Button
+                                        type="submit"
+                                        variant="contained"
+                                        color="primary"
+                                        size="small"
+                                    >
+                                        Lancer l'analyse
+                                    </Button>
+                                </div>)}
+                            </div>
+
                         </div>
-                    </form>
+                    </Box>
                 </Grid>
-                <Grid item xs="12" sm="12" id="img-preview-container">
-                    <Grid item xs="12" sm="12">
-                        <img id="image-preview" src="https://bit.ly/1ez08le" alt="upload your image" />
-                    </Grid>
+                <Grid item xs={12} sm={12} id="img-preview-container">
                     <div className="message-container">
                     </div>
                 </Grid>
             </Grid>
-            <Grid xs="12" sm="12" textAlign="center">
+            <Grid item xs={12} sm={12} textAlign="center">
                 <Typography variant="h2">Informations extraites</Typography>
                 <hr />
                 <Box
@@ -130,7 +197,6 @@ const Home = () => {
                                 fullWidth
                                 multiline
                                 variant="outlined"
-                                margin="1rem"
                                 label="Nationalité"
                                 name="nationality"
                                 id="nationality"

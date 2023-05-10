@@ -7,10 +7,25 @@ const app = express();
 const path = require('path');
 const port = 3002;
 const cors = require('cors');
+const CardId = require('./models/CardId');
+const multer = require('multer');
 
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
 app.use(cors());
+
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, './uploads/');
+    },
+    filename: function (req, file, cb) {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+        cb(null, 'upload' + '-' + uniqueSuffix + '.jpg');
+    },
+});
+
+const upload = multer({ storage });
+
 /*app.use(session({
     secret: 'mysecretkey',
     resave: false,
@@ -48,7 +63,6 @@ app.get('*', (req, res) => {
 });
 
 app.post('/login', (req, res) => {
-    console.log('in');
     const { email, password } = req.body;
 
     // Vérifiez les informations d'identification de l'utilisateur ici
@@ -65,6 +79,15 @@ app.get('/home', (req, res) => {
     // traitement de la requête GET pour la route '/home'
     res.send('Welcome to the home page');
 });
+
+app.post('/googleSubmit', upload.single('file'), (req, res) => {
+    if (req.file) {
+        console.log('in post googleSubmit : ', req.file.filename);
+        res.sendStatus(200);
+    } else {
+        res.status(400).send('Bad request');
+    }
+})
 
 app.listen(port, () => {
     console.log('Server listening on port ' , port);
