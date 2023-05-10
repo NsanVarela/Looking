@@ -87,7 +87,23 @@ app.post('/googleSubmit', upload.single('file'), (req, res) => {
     } else {
         res.status(400).send('Bad request');
     }
-})
+});
+
+app.post('/analyse-document', async (req, res) => {
+    try {
+        const file = req.file;
+        console.log('file : ', file);
+        // const [result] = await client.documentTextDetection(file);
+        // const fullTextAnnotation = result.fullTextAnnotation;
+        // console.log(fullTextAnnotation.text);
+        // // Traite la réponse et renvoie la réponse au client
+        // res.json({ text: fullTextAnnotation.text });
+        res.send('reçu');
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Une erreur s\'est produite lors de l\'analyse du document.' });
+    }
+});
 
 app.listen(port, () => {
     console.log('Server listening on port ' , port);

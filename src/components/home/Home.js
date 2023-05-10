@@ -33,6 +33,23 @@ const Home = () => {
         }
     }
 
+    const verifyDocument = () => {
+        if (imagePreviewUrl) {
+            const formData = new FormData();
+            formData.append('image', imagePreviewUrl);
+
+            axios
+                .post('http://localhost:3002/analyse-document', formData)
+                .then((response) => {
+                    // traitemetn de la réponse du serveur
+                    console.log(response.data);
+                })
+                .catch((error) => {
+                    console.error(error);
+                })
+        }
+    }
+
     const readURL = (event) => {
         if (event.target.files && event.target.files[0]) {
             const reader = new FileReader();
@@ -162,10 +179,11 @@ const Home = () => {
                                 )}
                                 {imagePreviewUrl && (<div>
                                     <Button
-                                        type="submit"
+                                        type="button"
                                         variant="contained"
                                         color="primary"
                                         size="small"
+                                        onClick={verifyDocument}
                                     >
                                         Lancer l'analyse
                                     </Button>
@@ -232,7 +250,7 @@ const Home = () => {
                                     </MenuItem>
                                 ))}
                             </TextField>
-{/*                            <FormControl fullWidth variant="outlined">
+                            {/*<FormControl fullWidth variant="outlined">
                                 <InputLabel>Genre</InputLabel>
                                 <Select label="Genre" name="gender" id="gender" value={cardId.gender}>
                                     <MenuItem value="M">Masculin</MenuItem>
