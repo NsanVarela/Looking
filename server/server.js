@@ -1,7 +1,7 @@
 const express = require('express');
-// const session = require('express-session');
+const session = require('express-session');
 // const jwt = require('jsonwebtoken');
-// const passport = require('passport');
+const passport = require('passport');
 const GithubStrategy = require('passport-github').Strategy;
 const app = express();
 const path = require('path');
@@ -11,41 +11,44 @@ const cors = require('cors');
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
 app.use(cors());
-// app.use(session({
-//     secret: 'mysecretkey',
-//     resave: false,
-//     saveUninitialized: true
-// }));
-//
-// passport.use(new GithubStrategy({
-//     clientID: GITHUB_CLIENT_ID,
-//     clientSecret: GITHUB_CLIENT_SECRET,
-//     callbackURL: 'http://localhost:3000/auth/github/callback'
-// },
-//     function(accessToke, refreshToken, profile, done) {
-//     const userData = {
-//         id: profile.id,
-//         username: profile.username,
-//         email: profile.email,
-//         photoUrl: profile.photos[0].value,
-//     };
-//     return done(null, userData);
-//     })
-// );
-//
-// app.get('/auth/github', passport.authenticate('github'));
-//
-// app.get('/auth/github/callback',
-//     passport.authenticate('github', { failureRedirect: '/login' }),
-//     function(req, res) {
-//     res.redirect('/home');
-//     })
+/*app.use(session({
+    secret: 'mysecretkey',
+    resave: false,
+    saveUninitialized: true
+}));
+
+passport.use(new GithubStrategy({
+    clientID: process.env.GITHUB_CLIENT_ID,
+    clientSecret: process.env.GITHUB_CLIENT_SECRET,
+    callbackURL: process.env.GITHUB_CALLBACK_URL
+},
+    function(accessToke, refreshToken, profile, done) {
+    const userData = {
+        id: profile.id,
+        username: profile.username,
+        email: profile.email,
+        photoUrl: profile.photos[0].value,
+    };
+    return done(null, userData);
+    })
+);
+
+app.get('/auth/github',
+    passport.authenticate('github', { scope: [ 'user:email' ] }));
+
+app.get('/auth/github/callback',
+    passport.authenticate('github', { failureRedirect: '/login',  failureFlash: true } ),
+    (req, res) => {
+        // Successful authentication, redirect home.
+        res.redirect('/home');
+    });*/
 
 app.get('*', (req, res) => {
     res.sendFile('index.html', { root: path.join(__dirname, 'public') });
 });
 
 app.post('/login', (req, res) => {
+    console.log('in');
     const { email, password } = req.body;
 
     // Vérifiez les informations d'identification de l'utilisateur ici

@@ -15,7 +15,6 @@ import {
 } from '@mui/material';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import GithubAuthButton from "./GithubAuthButton";
-// import GithubAuthButton from './GithubAuthButton';
 
 const theme = createTheme();
 

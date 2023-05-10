@@ -5,7 +5,7 @@ import {Box, Button} from "@mui/material";
 const GithubAuthButton = () => {
     const handleGithubAuth = async () => {
         try {
-            const response = await axios.get('http://localhost:3002/auth/github');
+            const response = await axios.get('http://localhost:3001/auth/github');
             window.location.href = response.data.redirectUrl;
         } catch (error) {
             console.error(error);
