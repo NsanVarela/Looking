@@ -16,9 +16,13 @@ import {CardId} from "../../../server/models/CardId";
 const Home = () => {
 
     const [imagePreviewUrl, setImagePreviewUrl] = useState('');
+    const [selectedFile, setSelectedFile] = useState(null);
+    const handleFileChange = (event) => {
+        setSelectedFile(event.target.files[0]);
+    };
     const cardId = new CardId();
 
-    const handleSubmitWithGoogle = async (event) => {
+    const uploadFile = async (event) => {
         event.preventDefault();
         const fileInput = document.getElementById('file-to-google');
         const file = fileInput.files[0];
@@ -27,21 +31,21 @@ const Home = () => {
         formData.append('file', file);
 
         try {
-            await axios.post('http://localhost:3002/googleSubmit', formData);
+            await axios.post('http://localhost:3002/upload', formData);
         } catch (error) {
             console.log("Une erreur s'est produite lors de la requête POST");
         }
     }
 
-    const verifyDocument = () => {
-        if (imagePreviewUrl) {
+    const launchAnalyse = () => {
+        if (selectedFile) {
             const formData = new FormData();
-            formData.append('image', imagePreviewUrl);
+            formData.append('file', selectedFile);
 
             axios
-                .post('http://localhost:3002/analyse-document', formData)
+                .post('http://localhost:3002/analyse', formData)
                 .then((response) => {
-                    // traitemetn de la réponse du serveur
+                    // traitement de la réponse du serveur
                     console.log(response.data);
                 })
                 .catch((error) => {
@@ -52,14 +56,16 @@ const Home = () => {
 
     const readURL = (event) => {
         if (event.target.files && event.target.files[0]) {
+            const file = event.target.files[0];
             const reader = new FileReader();
 
             reader.onload = (e) => {
+                setSelectedFile(file);
                 setImagePreviewUrl(e.target.result);
                 console.log('imagePreviewUrl:', e.target.result);
             };
 
-            reader.readAsDataURL(event.target.files[0]);
+            reader.readAsDataURL(file);
         }
     };
 
@@ -156,7 +162,7 @@ const Home = () => {
                 </Grid>*/}
 
                 <Grid item xs={12} sm={12} id="analyser-with-google">
-                    <Box component="form" onSubmit={handleSubmitWithGoogle} noValidate>
+                    <Box component="form" onSubmit={uploadFile} noValidate>
                         <Typography variant="h2" textAlign="center">GOOGLE VISION API</Typography>
                         <hr />
                         <Typography variant="body1" textAlign="center">
@@ -183,7 +189,7 @@ const Home = () => {
                                         variant="contained"
                                         color="primary"
                                         size="small"
-                                        onClick={verifyDocument}
+                                        onClick={launchAnalyse}
                                     >
                                         Lancer l'analyse
                                     </Button>

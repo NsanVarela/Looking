@@ -80,7 +80,7 @@ app.get('/home', (req, res) => {
     res.send('Welcome to the home page');
 });
 
-app.post('/googleSubmit', upload.single('file'), (req, res) => {
+app.post('/upload', upload.single('file'), (req, res) => {
     if (req.file) {
         console.log('in post googleSubmit : ', req.file.filename);
         res.sendStatus(200);
@@ -89,19 +89,24 @@ app.post('/googleSubmit', upload.single('file'), (req, res) => {
     }
 });
 
-app.post('/analyse-document', async (req, res) => {
-    try {
-        const file = req.file;
-        console.log('file : ', file);
-        // const [result] = await client.documentTextDetection(file);
-        // const fullTextAnnotation = result.fullTextAnnotation;
-        // console.log(fullTextAnnotation.text);
-        // // Traite la réponse et renvoie la réponse au client
-        // res.json({ text: fullTextAnnotation.text });
-        res.send('reçu');
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: 'Une erreur s\'est produite lors de l\'analyse du document.' });
+app.post('/analyse', upload.single('file'), async (req, res) => {
+    if (req.file) {
+        console.log('analyse launcher');
+        try {
+            const file = req.file;
+            console.log('file : ', file);
+            // const [result] = await client.documentTextDetection(file);
+            // const fullTextAnnotation = result.fullTextAnnotation;
+            // console.log(fullTextAnnotation.text);
+            // // Traite la réponse et renvoie la réponse au client
+            // res.json({ text: fullTextAnnotation.text });
+            res.send('reçu');
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({error: 'Une erreur s\'est produite lors de l\'analyse du document.'});
+        }
+    } else {
+        res.status(400).send('No file');
     }
 });
 
