@@ -1,18 +1,20 @@
+require('dotenv').config();
 const express = require('express');
-const session = require('express-session');
-// const jwt = require('jsonwebtoken');
-const passport = require('passport');
-const GithubStrategy = require('passport-github').Strategy;
 const app = express();
 const path = require('path');
 const port = 3002;
 const cors = require('cors');
 const CardId = require('./models/CardId');
 const multer = require('multer');
+const vision = require('@google-cloud/vision');
+const fs = require('fs');
+// const _toCardId = require('./services/CardExtract')
 
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
 app.use(cors());
+
+const visionClient = new vision.ImageAnnotatorClient( );
 
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -26,53 +28,8 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-/*app.use(session({
-    secret: 'mysecretkey',
-    resave: false,
-    saveUninitialized: true
-}));
-
-passport.use(new GithubStrategy({
-    clientID: process.env.GITHUB_CLIENT_ID,
-    clientSecret: process.env.GITHUB_CLIENT_SECRET,
-    callbackURL: process.env.GITHUB_CALLBACK_URL
-},
-    function(accessToke, refreshToken, profile, done) {
-    const userData = {
-        id: profile.id,
-        username: profile.username,
-        email: profile.email,
-        photoUrl: profile.photos[0].value,
-    };
-    return done(null, userData);
-    })
-);
-
-app.get('/auth/github',
-    passport.authenticate('github', { scope: [ 'user:email' ] }));
-
-app.get('/auth/github/callback',
-    passport.authenticate('github', { failureRedirect: '/login',  failureFlash: true } ),
-    (req, res) => {
-        // Successful authentication, redirect home.
-        res.redirect('/home');
-    });*/
-
 app.get('*', (req, res) => {
     res.sendFile('index.html', { root: path.join(__dirname, 'public') });
-});
-
-app.post('/login', (req, res) => {
-    const { email, password } = req.body;
-
-    // Vérifiez les informations d'identification de l'utilisateur ici
-
-    if (res.status(200)) {
-        console.log('Login successfull');
-        res.send('Authentication successful');
-    } else {
-        res.status(401).send('Invalid username or password');
-    }
 });
 
 app.get('/home', (req, res) => {
@@ -82,7 +39,6 @@ app.get('/home', (req, res) => {
 
 app.post('/upload', upload.single('file'), (req, res) => {
     if (req.file) {
-        console.log('in post googleSubmit : ', req.file.filename);
         res.sendStatus(200);
     } else {
         res.status(400).send('Bad request');
@@ -91,16 +47,42 @@ app.post('/upload', upload.single('file'), (req, res) => {
 
 app.post('/analyse', upload.single('file'), async (req, res) => {
     if (req.file) {
-        console.log('analyse launcher');
         try {
             const file = req.file;
-            console.log('file : ', file);
-            // const [result] = await client.documentTextDetection(file);
-            // const fullTextAnnotation = result.fullTextAnnotation;
-            // console.log(fullTextAnnotation.text);
-            // // Traite la réponse et renvoie la réponse au client
-            // res.json({ text: fullTextAnnotation.text });
-            res.send('reçu');
+            const buffer = fs.readFileSync(file.path);
+            const [result] = await visionClient.textDetection(buffer);
+            const detections = result.textAnnotations;
+            // const cardResult = _toCardId.toCardId(detections)
+
+            const securityField = detections[1].description + ' ' + detections[2].description;
+            const docType = detections[3].description + ' ' + detections[4].description + ' ' + detections[5].description;
+            const docNumber = detections[8].description;
+            const nationality = detections[9].description + ' ' + detections[10].description;
+            const lastname = detections[13].description;
+            const firstname = detections[18].description + detections[19].description + ' ' + detections[20].description;
+            const gender = detections[23].description;
+            const birth = detections[26].description;
+            const placeOfBirth = detections[27].description + detections[28].description + ' ' + detections[29].description + ' ' + detections[30].description + ' ' + detections[31].description + ' ' + detections[32].description;
+            const size = detections[33].description;
+            const zla1 = detections[42].description + detections[43].description;
+            const zla2 = detections[44].description + detections[45].description + detections[46].description + detections[47].description + detections[48].description + detections[49].description + detections[50].description;
+
+            const card = new CardId.CardId(
+                securityField,
+                docType,
+                docNumber,
+                nationality,
+                lastname,
+                firstname,
+                gender,
+                birth,
+                placeOfBirth,
+                size,
+                zla1,
+                zla2
+            );
+            const mrz = `${card.zla1 + card.zla2}`
+            res.json({ card, mrz });
         } catch (error) {
             console.error(error);
             res.status(500).json({error: 'Une erreur s\'est produite lors de l\'analyse du document.'});
@@ -109,6 +91,15 @@ app.post('/analyse', upload.single('file'), async (req, res) => {
         res.status(400).send('No file');
     }
 });
+
+app.post('/analyse-mrz', (req, res) => {
+    if (req.data) {
+        res.sendStatus(200);
+    } else {
+        res.status(400).send('No ZLA');
+    }
+
+})
 
 app.listen(port, () => {
     console.log('Server listening on port ' , port);

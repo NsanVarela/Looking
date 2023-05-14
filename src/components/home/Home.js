@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import axios from 'axios';
-import { makeStyles } from '@material-ui/core/styles';
+import {makeStyles} from '@material-ui/core/styles';
 import {
     Grid,
     Typography,
@@ -9,18 +9,42 @@ import {
     ThemeProvider,
     Box,
     TextField,
-    MenuItem
 } from '@mui/material';
 import {CardId} from "../../../server/models/CardId";
+
+function verifyMrz(ligne, somme = 0){
+    const factors = [7,3,1]
+    const chars = Array.from(ligne)
+    let result = 0
+    let offset = 0
+
+    chars.forEach(char => {
+        if(char === '<') {
+            char = 0
+        } else if (char.charCodeAt(0)>= 65 && char.charCodeAt(0) <= 90) {
+            char = char.charCodeAt(0) - 55
+        } else if (char >= 0 && char <= 9) {
+            char = parseInt(char)
+        } else {
+            const factor = offset % 3
+            result += char * factors[factor]
+            offset += 1 ;
+        }
+
+    })
+    return ((result % 10) === somme);
+}
 
 const Home = () => {
 
     const [imagePreviewUrl, setImagePreviewUrl] = useState('');
     const [selectedFile, setSelectedFile] = useState(null);
-    const handleFileChange = (event) => {
-        setSelectedFile(event.target.files[0]);
-    };
-    const cardId = new CardId();
+
+    const [cniCard, setCniCard] = useState('');
+    const [zla, setZla] = useState('');
+    const [mrzStatut, setMrzStatut] = useState('');
+
+    let cardId = new CardId();
 
     const uploadFile = async (event) => {
         event.preventDefault();
@@ -45,12 +69,44 @@ const Home = () => {
             axios
                 .post('http://localhost:3002/analyse', formData)
                 .then((response) => {
-                    // traitement de la réponse du serveur
-                    console.log(response.data);
+                    // response = resp
+                    cardId = {
+                        birth: response.data.card._birth,
+                        docNumber: response.data.card._docNumber,
+                        docType: response.data.card._docType,
+                        firstname: response.data.card._firstname,
+                        gender: response.data.card._gender,
+                        lastname: response.data.card._lastname,
+                        nationality: response.data.card._nationality,
+                        placeOfBirth: response.data.card._placeOfBirth,
+                        securityField: response.data.card._securityField,
+                        size: response.data.card._size,
+                        zla1: response.data.card._zla1,
+                        zla2: response.data.card._zla2,
+                    }
+                    setCniCard(cardId);
+                    setZla(cardId.zla1 + cardId.zla2)
                 })
                 .catch((error) => {
                     console.error(error);
                 })
+        }
+    }
+
+    const cniCardValidate = async () => {
+        const statut = verifyMrz(zla)
+        let mrzMessage = '';
+        switch (statut) {
+            case true:
+                mrzMessage = `La Carte Nationale d'Identité est valide`;
+                setMrzStatut(mrzMessage)
+                return mrzStatut;
+            case false:
+                mrzMessage = `La Carte Nationale d'Identité n'est pas valide`
+                setMrzStatut(mrzMessage)
+                return mrzStatut;
+            default:
+                return null;
         }
     }
 
@@ -62,24 +118,18 @@ const Home = () => {
             reader.onload = (e) => {
                 setSelectedFile(file);
                 setImagePreviewUrl(e.target.result);
-                console.log('imagePreviewUrl:', e.target.result);
             };
 
             reader.readAsDataURL(file);
         }
     };
 
-    const genders = [
-        {value: 'Masculin'},
-        {value: 'Féminin'}
-    ]
-
     const theme = createTheme({
         components: {
             MuiInput: {
                 variants: [
                     {
-                        props: { variant: 'uploadInfo'},
+                        props: {variant: 'uploadInfo'},
                         style: {
                             display: 'none',
                         }
@@ -89,7 +139,7 @@ const Home = () => {
             MuiButton: {
                 variants: [
                     {
-                        props: { variant: 'contained', color: 'primary' },
+                        props: {variant: 'contained', color: 'primary'},
                         style: {
                             marginTop: `2rem`,
                             marginBottom: `2rem`,
@@ -138,33 +188,10 @@ const Home = () => {
 
     return (
         <ThemeProvider theme={theme}>
-            <Grid container spacing={2} >
-                {/*<Grid item xs={12} sm={6} id="analyser-with-abbyy">
-                    <form action="/abbyy" method="POST" encType="multipart/form-data">
-                        <Typography variant="h2" textAlign="center">ABBYY API</Typography>
-                        <hr />
-                        <Typography variant="body1" textAlign="center">
-                            Sélectionner une image à uploader (png, jpg, jpeg)
-                        </Typography>
-                        <input
-                            type="file"
-                            name="filename"
-                            id="file-to-abbyy"
-                            accept=".jpg, .jpeg, .png"
-                            onChange="readURL(this);"
-                        />
-                        <div>
-                            <Button type="submit" variant="contained" color="primary" size="small" >
-                                Analyser avec ABBYY
-                            </Button>
-                        </div>
-                    </form>
-                </Grid>*/}
-
                 <Grid item xs={12} sm={12} id="analyser-with-google">
-                    <Box component="form" onSubmit={uploadFile} noValidate>
+                    <Box component="form" onSubmit={uploadFile} noValidate encType="multipart/form-data">
                         <Typography variant="h2" textAlign="center">GOOGLE VISION API</Typography>
-                        <hr />
+                        <hr/>
                         <Typography variant="body1" textAlign="center">
                             Sélectionner une image à uploader (png, jpg, jpeg)
                         </Typography>
@@ -181,7 +208,7 @@ const Home = () => {
                             </div>
                             <div className={classes.imageContainer}>
                                 {imagePreviewUrl && (
-                                    <img className={classes.previewImage} src={imagePreviewUrl} alt="Image Preview" />
+                                    <img className={classes.previewImage} src={imagePreviewUrl} alt="Image Preview"/>
                                 )}
                                 {imagePreviewUrl && (<div>
                                     <Button
@@ -203,126 +230,146 @@ const Home = () => {
                     <div className="message-container">
                     </div>
                 </Grid>
-            </Grid>
-            <Grid item xs={12} sm={12} textAlign="center">
-                <Typography variant="h2">Informations extraites</Typography>
-                <hr />
-                <Box
-                    component="form"
-                    sx={{
-                        '& .MuiTextField-root': { m: 1, width: '100ch' },
-                    }}
-                    id="result-container">
-                    <Typography id="mrz-data">MRZ : {cardId.zla1 + cardId.zla2}</Typography>
-                    <Typography id="mrz-status">Statut MRZ :</Typography>
-                    <Grid container spacing={2}>
-                        <Grid item xs={12} sm={6}>
-                            <TextField
-                                fullWidth
-                                multiline
-                                variant="outlined"
-                                label="Nationalité"
-                                name="nationality"
-                                id="nationality"
-                                value={cardId.nationality}
-                            />
-                            <TextField
-                                fullWidth
-                                multiline
-                                variant="outlined"
-                                label="Nom"
-                                name="lastname"
-                                id="lastname"
-                                value={cardId.lastname}
-                            />
-                            <TextField
-                                fullWidth
-                                multiline
-                                variant="outlined"
-                                label="Prénom(s)"
-                                name="firstname"
-                                id="firstname"
-                                value={cardId.firstname}
-                            />
-                            <TextField
-                                id="filled-select-currency"
-                                select
-                                label="Genre"
-                                variant="outlined"
-                            >
-                                {genders.map((option) => (
-                                    <MenuItem key={option.value} value={option.value}>
-                                        {option.label}
-                                    </MenuItem>
-                                ))}
-                            </TextField>
-                            {/*<FormControl fullWidth variant="outlined">
-                                <InputLabel>Genre</InputLabel>
-                                <Select label="Genre" name="gender" id="gender" value={cardId.gender}>
-                                    <MenuItem value="M">Masculin</MenuItem>
-                                    <MenuItem value="F">Féminin</MenuItem>
-                                </Select>
-                            </FormControl>*/}
-                            <TextField
-                                fullWidth
-                                multiline
-                                variant="outlined"
-                                label="Date de naissance"
-                                name="birth"
-                                id="birth"
-                                value={cardId.birth}
-                            />
+
+            {cniCard && (
+                <Grid item xs={12} sm={12} textAlign="center">
+                    <Typography variant="h3">
+                        Informations extraites
+                    </Typography>
+                    <hr/>
+                    <Box
+                        component="form"
+                        sx={{
+                            '& .MuiTextField-root': {m: 1, width: '100ch'},
+                        }}
+                        id="result-container"
+                    >
+                        <Grid container spacing={2}>
+                            <Grid item xs={12} sm={6}>
+                                <TextField
+                                    fullWidth
+                                    multiline
+                                    variant="filled"
+                                    label="Nationalité"
+                                    name="nationality"
+                                    id="nationality"
+                                    disabled
+                                    value={`${cniCard.nationality}`}
+                                />
+                                <TextField
+                                    fullWidth
+                                    multiline
+                                    variant="filled"
+                                    label="Nom"
+                                    name="lastname"
+                                    id="lastname"
+                                    disabled
+                                    value={`${cniCard.lastname}`}
+                                />
+                                <TextField
+                                    fullWidth
+                                    multiline
+                                    variant="filled"
+                                    label="Prénom(s)"
+                                    name="firstname"
+                                    id="firstname"
+                                    disabled
+                                    value={`${cniCard.firstname}`}
+                                />
+                                <TextField
+                                    fullWidth
+                                    multiline
+                                    variant="filled"
+                                    label="Genre"
+                                    name="gender"
+                                    id="gender"
+                                    disabled
+                                    value={`${cniCard.gender}`}
+                                />
+                                <TextField
+                                    fullWidth
+                                    multiline
+                                    variant="filled"
+                                    label="Date de naissance"
+                                    name="birth"
+                                    id="birth"
+                                    disabled
+                                    value={`${cniCard.birth}`}
+                                />
+                            </Grid>
+                            <Grid item xs={12} sm={6}>
+                                <TextField
+                                    fullWidth
+                                    multiline
+                                    variant="filled"
+                                    label="Type de document"
+                                    name="docType"
+                                    id="docType"
+                                    disabled
+                                    value={`${cniCard.docType}`}
+                                />
+                                <TextField
+                                    fullWidth
+                                    multiline
+                                    variant="filled"
+                                    label="Numéro de document"
+                                    name="docNumber"
+                                    id="docNumber"
+                                    disabled
+                                    value={`${cniCard.docNumber}`}
+                                />
+                                <TextField
+                                    fullWidth
+                                    multiline
+                                    variant="filled"
+                                    label="Pays"
+                                    name="country"
+                                    id="country"
+                                    disabled
+                                    value={`${cniCard.placeOfBirth}`}
+                                />
+                                <TextField
+                                    fullWidth
+                                    multiline
+                                    variant="filled"
+                                    label="Taille"
+                                    name="size"
+                                    id="size"
+                                    disabled
+                                    value={`${cniCard.size}`}
+                                />
+                                <TextField
+                                    fullWidth
+                                    multiline
+                                    variant="filled"
+                                    label="ZLA"
+                                    name="zla"
+                                    id="zla"
+                                    disabled
+                                    value={`${cniCard.zla1}${cniCard.zla2}`}
+                                />
+                            </Grid>
                         </Grid>
-                        <Grid item xs={12} sm={6}>
-                            <TextField
-                                fullWidth
-                                multiline
-                                variant="outlined"
-                                label="Type de document"
-                                name="docType"
-                                id="docType"
-                                value={cardId.docType}
-                            />
-                            <TextField
-                                fullWidth
-                                multiline
-                                variant="outlined"
-                                label="Numéro de document"
-                                name="docNumber"
-                                id="docNumber"
-                                value={cardId.docNumber}
-                            />
-                            <TextField
-                                fullWidth
-                                multiline
-                                variant="outlined"
-                                label="Pays"
-                                name="country"
-                                id="country"
-                                value={cardId.placeOfBirth}
-                            />
-                            <TextField
-                                fullWidth
-                                multiline
-                                variant="outlined"
-                                label="ZLA Ligne 1"
-                                name="zla1"
-                                id="zla1"
-                                value={cardId.zla1}
-                            />
-                            <TextField
-                                fullWidth
-                                multiline
-                                variant="outlined"
-                                label="ZLA Ligne 2"
-                                name="zla2"
-                                id="zla2"
-                                value={cardId.zla2}
-                            />
-                        </Grid>
-                    </Grid>
-                </Box>
-            </Grid>
+                    </Box>
+                    <Box component="form" onSubmit={cniCardValidate} noValidate encType="multipart/form-data">
+                        <Button
+                            type="button"
+                            variant="contained"
+                            color="primary"
+                            size="small"
+                            onClick={cniCardValidate}
+                        >
+                            Tester la validité de cette Carte Nationale d'Identité
+                        </Button>
+                    </Box>
+
+                    {mrzStatut &&(
+                        <Typography id="mrz-status">
+                            {mrzStatut}
+                        </Typography>
+                    )}
+
+                </Grid>)}
         </ThemeProvider>
 
     );
