@@ -1,5 +1,5 @@
 {
-  "name": "Vision",
+  "name": "Looking",
   "version": "1.0.0",
   "description": "OCR-ICR Document analysis app",
   "main": "server/server.js",

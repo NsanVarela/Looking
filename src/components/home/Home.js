@@ -16,12 +16,12 @@ import {
 } from '@mui/material'
 import {CardId} from "../../../server/models/CardId"
 import LOGO from '../assets/images/logo-looking.png'
-import CNI1 from '../assets/images/brigitte-cni.jpg'
-import CNI3 from '../assets/images/voldo-cni.jpg'
+import CNI1 from '../assets/images/maelys.jpg'
+import CNI3 from '../assets/images/selkis.jpeg'
 import CNI2 from '../assets/images/michael-cni.jpg'
 
 const cards = [
-    {id: 1, name: 'Brigitte', src: CNI1},
+    {id: 1, name: 'Maëlys', src: CNI1},
     {id: 2, name: 'Mickael', src: CNI2},
     {id: 3, name: 'Voldemort', src: CNI3},
 ]
