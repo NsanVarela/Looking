@@ -33,7 +33,6 @@ app.get('*', (req, res) => {
 });
 
 app.get('/home', (req, res) => {
-    // traitement de la requête GET pour la route '/home'
     res.send('Welcome to the home page');
 });
 
