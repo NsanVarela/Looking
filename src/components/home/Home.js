@@ -1,6 +1,6 @@
-import React, {useState} from 'react';
-import axios from 'axios';
-import {makeStyles} from '@material-ui/core/styles';
+import React, {useState} from 'react'
+import axios from 'axios'
+import {makeStyles} from '@material-ui/core/styles'
 import {
     Grid,
     Typography,
@@ -9,26 +9,40 @@ import {
     ThemeProvider,
     Box,
     TextField,
-} from '@mui/material';
-import {CardId} from "../../../server/models/CardId";
+    Card,
+    CardMedia,
+    CardActionArea,
+    CardContent
+} from '@mui/material'
+import {CardId} from "../../../server/models/CardId"
+import LOGO from '../assets/images/logo-looking.png'
+import CNI1 from '../assets/images/brigitte-cni.jpg'
+import CNI3 from '../assets/images/voldo-cni.jpg'
+import CNI2 from '../assets/images/michael-cni.jpg'
 
-function verifyMrz(ligne, somme = 0){
-    const factors = [7,3,1]
+const cards = [
+    {id: 1, name: 'Brigitte', src: CNI1},
+    {id: 2, name: 'Mickael', src: CNI2},
+    {id: 3, name: 'Voldemort', src: CNI3},
+]
+
+function verifyMrz(ligne, somme = 0) {
+    const factors = [7, 3, 1]
     const chars = Array.from(ligne)
     let result = 0
     let offset = 0
 
     chars.forEach(char => {
-        if(char === '<') {
+        if (char === '<') {
             char = 0
-        } else if (char.charCodeAt(0)>= 65 && char.charCodeAt(0) <= 90) {
+        } else if (char.charCodeAt(0) >= 65 && char.charCodeAt(0) <= 90) {
             char = char.charCodeAt(0) - 55
         } else if (char >= 0 && char <= 9) {
             char = parseInt(char)
         } else {
             const factor = offset % 3
             result += char * factors[factor]
-            offset += 1 ;
+            offset += 1;
         }
 
     })
@@ -37,9 +51,7 @@ function verifyMrz(ligne, somme = 0){
 
 const Home = () => {
 
-    const [imagePreviewUrl, setImagePreviewUrl] = useState('');
     const [selectedFile, setSelectedFile] = useState(null);
-
     const [cniCard, setCniCard] = useState('');
     const [zla, setZla] = useState('');
     const [mrzStatut, setMrzStatut] = useState('');
@@ -110,20 +122,6 @@ const Home = () => {
         }
     }
 
-    const readURL = (event) => {
-        if (event.target.files && event.target.files[0]) {
-            const file = event.target.files[0];
-            const reader = new FileReader();
-
-            reader.onload = (e) => {
-                setSelectedFile(file);
-                setImagePreviewUrl(e.target.result);
-            };
-
-            reader.readAsDataURL(file);
-        }
-    };
-
     const theme = createTheme({
         components: {
             MuiInput: {
@@ -151,6 +149,44 @@ const Home = () => {
     });
 
     const useStyles = makeStyles((theme) => ({
+        logo: {
+            display: 'flex',
+            justifyContent: 'space-around',
+        },
+        baseline: {
+            fontSize: '2rem',
+            fontWeight: '300',
+            fontFamily: 'Roboto, Helvetica, Arial, sans-serif',
+            textTransform: 'uppercase',
+            textAlign: 'center',
+            marginBottom: '7rem',
+        },
+        select: {
+            fontSize: '1rem',
+            fontFamily: 'Roboto, Helvetica, Arial, sans-serif',
+            marginTop: '5rem',
+            marginBottom: '3rem',
+            textAlign: 'center',
+            fontWeight: '300',
+        },
+        cards: {
+            display: 'flex',
+            justifyContent: 'space-around',
+        },
+        cniCard: {},
+        dropZone: {
+            width: '30rem',
+            height: '21rem',
+            border: '2px dashed #aaa',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            margin: '3rem auto'
+        },
+        draggedImage: {
+            width: '26rem',
+            height: '17rem'
+        },
         setupContainer: {
             display: 'flex',
             flexDirection: 'column',
@@ -186,50 +222,90 @@ const Home = () => {
 
     const classes = useStyles();
 
+
+    const [draggedImage, setDraggedImage] = useState(null);
+
+    const handleDragStart = (event, image) => {
+        setDraggedImage(image);
+    };
+
+    const handleDragOver = (event) => {
+        event.preventDefault();
+    };
+
+    const handleDrop = (event, card) => {
+        event.preventDefault();
+        const droppedFile = event.dataTransfer.files[0];
+        setSelectedFile(droppedFile);
+    };
+
+
     return (
         <ThemeProvider theme={theme}>
-                <Grid item xs={12} sm={12} id="analyser-with-google">
-                    <Box component="form" onSubmit={uploadFile} noValidate encType="multipart/form-data">
-                        <Typography variant="h2" textAlign="center">GOOGLE VISION API</Typography>
-                        <hr/>
-                        <Typography variant="body1" textAlign="center">
-                            Sélectionner une image à uploader (png, jpg, jpeg)
-                        </Typography>
-                        <div className={classes.setupContainer}>
-                            <div className={classes.inputContainer}>
-                                <input
-                                    type="file"
-                                    name="filename"
-                                    id="file-to-google"
-                                    className={classes.input}
-                                    accept=".jpg, .jpeg, .png"
-                                    onChange={(event) => readURL(event)}
-                                />
-                            </div>
-                            <div className={classes.imageContainer}>
-                                {imagePreviewUrl && (
-                                    <img className={classes.previewImage} src={imagePreviewUrl} alt="Image Preview"/>
-                                )}
-                                {imagePreviewUrl && (<div>
-                                    <Button
-                                        type="button"
-                                        variant="contained"
-                                        color="primary"
-                                        size="small"
-                                        onClick={launchAnalyse}
-                                    >
-                                        Lancer l'analyse
-                                    </Button>
-                                </div>)}
-                            </div>
-
-                        </div>
-                    </Box>
-                </Grid>
-                <Grid item xs={12} sm={12} id="img-preview-container">
-                    <div className="message-container">
+            <Grid item xs={12} sm={12} id="analyser-with-google">
+                <Box component="form" noValidate encType="multipart/form-data">
+                    <div className={classes.logo}>
+                        <img src={LOGO} alt="Logo"/>
                     </div>
-                </Grid>
+                    <p className={classes.baseline} textAlign="center">Instantly extract text from images</p>
+                    <hr/>
+                    <p className={classes.select} textAlign="center">Sélectionner une image à analyser</p>
+                    <div className={classes.cards}>
+                        {cards.map(card =>
+                            <Card sx={{maxWidth: 345}}>
+                                <CardActionArea>
+                                    <CardMedia
+                                        component="img"
+                                        height="140"
+                                        image={card.src}
+                                        alt="Carte Nationale d'Identité"
+                                        draggable
+                                        onDragStart={(event) => handleDragStart(event, card.src)}
+                                    />
+                                    <CardContent>
+                                        <Typography gutterBottom variant="h5" component="div">
+                                            {card.name}
+                                        </Typography>
+                                    </CardContent>
+                                </CardActionArea>
+                            </Card>
+                        )}
+                    </div>
+
+                    <div
+                        onDragOver={handleDragOver}
+                        onDrop={handleDrop}
+                        className={classes.dropZone}
+                    >
+                        {draggedImage ? (
+                            <img
+                                src={draggedImage}
+                                alt="Dragged Image"
+                                className={classes.draggedImage}
+                            />
+                        ) : (
+                            <p>Faire glisser une image ici</p>
+                        )}
+                    </div>
+                    <div className={classes.imageContainer}>
+                        {draggedImage && (<div>
+                            <Button
+                                type="button"
+                                variant="contained"
+                                color="primary"
+                                size="small"
+                                onClick={launchAnalyse}
+                            >
+                                Lancer l'analyse
+                            </Button>
+                        </div>)}
+                    </div>
+                </Box>
+            </Grid>
+            <Grid item xs={12} sm={12} id="img-preview-container">
+                <div className="message-container">
+                </div>
+            </Grid>
 
             {cniCard && (
                 <Grid item xs={12} sm={12} textAlign="center">
@@ -363,7 +439,7 @@ const Home = () => {
                         </Button>
                     </Box>
 
-                    {mrzStatut &&(
+                    {mrzStatut && (
                         <Typography id="mrz-status">
                             {mrzStatut}
                         </Typography>
@@ -371,7 +447,6 @@ const Home = () => {
 
                 </Grid>)}
         </ThemeProvider>
-
     );
 }
 
