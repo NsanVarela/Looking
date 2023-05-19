@@ -3,10 +3,71 @@ const CardId = require('../models/CardId')
 const toCardId = (datasCni) => {
     let properties = (datasCni[0].description.trim()).split(/\r|\n/)
     let cardId = new CardId.CardId
+    console.log('properties : ', properties);
+
+    let securityFieldConcatenated = '';
+    let foundElement = '';
+
+    for (let i = 0; i < properties.length; i++) {
+        const element = properties[i].toUpperCase();
+
+        if (element.startsWith('RÉPUBLIQUE') || element.startsWith('FRANÇAISE')) { // *********************** OK : sécurité
+            if (securityFieldConcatenated === '') {
+                securityFieldConcatenated = element;
+            } else {
+                securityFieldConcatenated += ' ' + element;
+            }
+        } else if (element === 'RÉPUBLIQUE FRANÇAISE') {
+            foundElement = element;
+        }
+
+        if (element.includes(`CARTE NATIONALE`)) { // *********************** OK : numéro de document
+            let pos = element.indexOf(':')
+            let docNumber = element.substring(pos + 1, element.length)
+            let docNumberIsolated = docNumber.match(/\d/g).join("");
+        }
+
+        if (element.startsWith(`CARTE NATIONALE`)) { // *********************** OK : type de document
+            let pos = element.indexOf('CARTE')
+            let docType = element.substring(pos, pos + 26)
+        }
+
+        if (element.match(`NATIONALIT`)) { // *********************** OK : nationalité
+            let pos = element.indexOf('NATIONALIT')
+            const nationality = element.substring(pos, element.length)
+        }
+
+        if (element.includes(`NOM`) && !element.startsWith(`PRÉNOM`) && !element.includes(`USAGE`)) { // *********************** OK : nom
+            let pos = element.indexOf(':')
+            let lastname = element.substring(pos + 1, element.length)
+        }
+
+        if (element.startsWith(`PRÉNOM`)) { // *********************** OK : prenom
+            let pos = element.indexOf(':')
+            let firstname = element.substring(pos + 1, element.length)
+        }
+    }
+
+    console.log('Concatenated:', securityFieldConcatenated);
+    console.log('Found Element:', foundElement);
+
+
+
+
+
+
 
     properties.forEach(function (element) {
         const line = element.toUpperCase()
         if (line !== '') {
+            if (line.startsWith(`RÉPUBLIQUE`) || line.startsWith(`FRANÇAISE`)) {
+                let pos = line.indexOf('RÉPUBLIQUE')
+                let pos1 = line.indexOf('FRANÇAISE')
+                let sub = line.substring(pos, pos.length) + ' ' + line.substring(pos1, pos1.length)
+                // console.log('sub : ', sub)
+                let securityField = line.substring(pos, line.length)
+                // console.log('securityField : ', securityField)
+            }
             if (line.includes(`RÉPUBLIQUE FRANÇAISE`)) {
                 let pos = line.indexOf('RÉPUBLIQUE')
                 let securityField = line.substring(pos, line.length)

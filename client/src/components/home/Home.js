@@ -16,8 +16,8 @@ import {
 } from '@mui/material'
 import {CardId} from "../../../../server/models/CardId"
 import LOGO from '../../../public/assets/images/logo-looking.png'
-import CNI1 from '../../../public/assets/images/maelys.jpg'
-import CNI3 from '../../../public/assets/images/selkis.jpeg'
+import CNI1 from '../../../public/assets/images/voldo-cni.jpg'
+import CNI3 from '../../../public/assets/images/brigitte-cni.jpg'
 import CNI2 from '../../../public/assets/images/michael-cni.jpg'
 
 const cards = [
