@@ -14,11 +14,11 @@ import {
     CardActionArea,
     CardContent
 } from '@mui/material'
-import {CardId} from "../../../server/models/CardId"
-import LOGO from '../assets/images/logo-looking.png'
-import CNI1 from '../assets/images/maelys.jpg'
-import CNI3 from '../assets/images/selkis.jpeg'
-import CNI2 from '../assets/images/michael-cni.jpg'
+import {CardId} from "../../../../server/models/CardId"
+import LOGO from '../../../public/assets/images/logo-looking.png'
+import CNI1 from '../../../public/assets/images/maelys.jpg'
+import CNI3 from '../../../public/assets/images/selkis.jpeg'
+import CNI2 from '../../../public/assets/images/michael-cni.jpg'
 
 const cards = [
     {id: 1, name: 'Maëlys', src: CNI1},

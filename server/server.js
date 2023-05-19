@@ -10,7 +10,7 @@ const vision = require('@google-cloud/vision');
 const fs = require('fs');
 // const _toCardId = require('./services/CardExtract')
 
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'client/public')));
 app.use(express.json());
 app.use(cors());
 
@@ -29,7 +29,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 app.get('*', (req, res) => {
-    res.sendFile('index.html', { root: path.join(__dirname, 'public') });
+    res.sendFile('index.html', { root: path.join(__dirname, 'client/public') });
 });
 
 app.get('/home', (req, res) => {
