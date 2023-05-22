@@ -81,20 +81,19 @@ const Home = () => {
             axios
                 .post('http://localhost:3002/analyse', formData)
                 .then((response) => {
-                    // response = resp
                     cardId = {
-                        birth: response.data.card._birth,
-                        docNumber: response.data.card._docNumber,
-                        docType: response.data.card._docType,
-                        firstname: response.data.card._firstname,
-                        gender: response.data.card._gender,
-                        lastname: response.data.card._lastname,
-                        nationality: response.data.card._nationality,
-                        placeOfBirth: response.data.card._placeOfBirth,
-                        securityField: response.data.card._securityField,
-                        size: response.data.card._size,
-                        zla1: response.data.card._zla1,
-                        zla2: response.data.card._zla2,
+                        birth: response.data.card._securityField._birth,
+                        docNumber: response.data.card._securityField._docNumber,
+                        docType: response.data.card._securityField._docType,
+                        firstname: response.data.card._securityField._firstname,
+                        gender: response.data.card._securityField._gender,
+                        lastname: response.data.card._securityField._lastname,
+                        nationality: response.data.card._securityField._nationality,
+                        placeOfBirth: response.data.card._securityField._placeOfBirth,
+                        securityField: response.data.card._securityField._securityField,
+                        size: response.data.card._securityField._size,
+                        zla1: response.data.card._securityField._zla1,
+                        zla2: response.data.card._securityField._zla2,
                     }
                     setCniCard(cardId);
                     setZla(cardId.zla1 + cardId.zla2)

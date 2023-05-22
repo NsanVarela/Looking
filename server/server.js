@@ -8,11 +8,17 @@ const CardId = require('./models/CardId');
 const multer = require('multer');
 const vision = require('@google-cloud/vision');
 const fs = require('fs');
+const _toCardId = require("./services/CardExtract");
 // const _toCardId = require('./services/CardExtract')
 
 app.use(express.static(path.join(__dirname, 'client/public')));
 app.use(express.json());
-app.use(cors());
+app.use(cors({
+    origin: "http://localhost:3000", // Remplacez par l'URL de votre application React
+    methods: ["GET", "POST"],
+    allowedHeaders: ["Content-Type"],
+    credentials: true,
+}));
 
 const visionClient = new vision.ImageAnnotatorClient( );
 
@@ -51,34 +57,10 @@ app.post('/analyse', upload.single('file'), async (req, res) => {
             const buffer = fs.readFileSync(file.path);
             const [result] = await visionClient.textDetection(buffer);
             const detections = result.textAnnotations;
-            // const cardResult = _toCardId.toCardId(detections)
-
-            const securityField = detections[1].description + ' ' + detections[2].description;
-            const docType = detections[3].description + ' ' + detections[4].description + ' ' + detections[5].description;
-            const docNumber = detections[8].description;
-            const nationality = detections[9].description + ' ' + detections[10].description;
-            const lastname = detections[13].description;
-            const firstname = detections[18].description + detections[19].description + ' ' + detections[20].description;
-            const gender = detections[23].description;
-            const birth = detections[26].description;
-            const placeOfBirth = detections[27].description + detections[28].description + ' ' + detections[29].description + ' ' + detections[30].description + ' ' + detections[31].description + ' ' + detections[32].description;
-            const size = detections[33].description;
-            const zla1 = detections[42].description + detections[43].description;
-            const zla2 = detections[44].description + detections[45].description + detections[46].description + detections[47].description + detections[48].description + detections[49].description + detections[50].description;
+            const cardResult = _toCardId.toCardId(detections)
 
             const card = new CardId.CardId(
-                securityField,
-                docType,
-                docNumber,
-                nationality,
-                lastname,
-                firstname,
-                gender,
-                birth,
-                placeOfBirth,
-                size,
-                zla1,
-                zla2
+                cardResult
             );
             const mrz = `${card.zla1 + card.zla2}`
             res.json({ card, mrz });
